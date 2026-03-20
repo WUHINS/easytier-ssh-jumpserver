@@ -121,7 +121,7 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         context: ./build
-        file: ./Dockerfile
+        file: ./build/Dockerfile
         platforms: ${{ github.event.inputs.platforms || 'linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6' }}
         push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_to_registry != 'false' || github.event_name != 'workflow_dispatch') }}
         tags: ${{ steps.meta.outputs.tags }}
