@@ -47,9 +47,9 @@ RUN chmod +x /usr/local/bin/*.sh
 RUN mv /usr/local/bin/easytier /usr/local/bin/easytier-core
 
 # 获取 EasyTier 版本并设置为环境变量
-RUN EASYTIER_VERSION=$(easytier-core --version 2>&1 | head -n1 || echo "unknown") && \
+RUN EASYTIER_VERSION=$(easytier-core --version 2>&1 | head -n1 | tr -d '\n' || echo "unknown") && \
     echo "Built with EasyTier version: $EASYTIER_VERSION" && \
-    echo "EASYTIER_VERSION=$EASYTIER_VERSION" > /etc/easytier_version
+    printf 'EASYTIER_VERSION="%s"\n' "$EASYTIER_VERSION" > /etc/easytier_version
 
 ENV TZ=Asia/Shanghai
 ENV SSH_PORT=22
