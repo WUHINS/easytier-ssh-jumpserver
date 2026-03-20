@@ -103,8 +103,8 @@ jobs:
           echo "Extracted files:"
           find . -type f | head -10
           
-          # 查找 easytier 二进制文件
-          EASYTIER_BIN=$(find . -name "easytier" -type f | head -n1)
+          # 查找 easytier-core 二进制文件（在子目录中）
+          EASYTIER_BIN=$(find . -name "easytier-core" -type f | head -n1)
           
           if [ -n "$EASYTIER_BIN" ]; then
             echo "Found: $EASYTIER_BIN"
@@ -115,7 +115,7 @@ jobs:
             echo "✅ Success: $ARCH_DIR/easytier"
             ls -la "$ARCH_DIR/"
           else
-            echo "❌ easytier binary not found!"
+            echo "❌ easytier-core binary not found!"
             echo "Contents of temp dir:"
             ls -laR
             cd ..
