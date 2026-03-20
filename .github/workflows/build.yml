@@ -61,21 +61,29 @@ jobs:
         LATEST_RELEASE=$(curl -s https://api.github.com/repos/EasyTier/EasyTier/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         echo "Downloading EasyTier $LATEST_RELEASE"
         
-        # Download all architectures
-        ARCHIVES=(
-          "easytier-linux-x86_64"
-          "easytier-linux-aarch64"
-          "easytier-linux-armv7hf"
-          "easytier-linux-armhf"
-          "easytier-linux-riscv64"
+        # Download and extract all architectures
+        # Create directories matching TARGETPLATFORM format
+        ARCHIVE_MAP=(
+          "x86_64:easytier-linux-x86_64"
+          "aarch64:easytier-linux-aarch64"
+          "armv7hf:easytier-linux-armv7hf"
+          "armhf:easytier-linux-armhf"
+          "riscv64:easytier-linux-riscv64"
         )
         
-        for arch in "${ARCHIVES[@]}"; do
-          URL="https://github.com/EasyTier/EasyTier/releases/download/$LATEST_RELEASE/${arch}.zip"
-          echo "Downloading $arch..."
-          curl -L -o "${arch}.zip" "$URL" 2>/dev/null && unzip -o "${arch}.zip" || true
-          mkdir -p "$arch"
-          mv easytier-core* "$arch/" 2>/dev/null || true
+        for mapping in "${ARCHIVE_MAP[@]}"; do
+          ARCH_DIR="${mapping%%:*}"
+          ARCHIVE_NAME="${mapping##*:}"
+          URL="https://github.com/EasyTier/EasyTier/releases/download/$LATEST_RELEASE/${ARCHIVE_NAME}.zip"
+          echo "Downloading $ARCHIVE_NAME..."
+          
+          mkdir -p "$ARCH_DIR"
+          if curl -L -o "${ARCHIVE_NAME}.zip" "$URL" 2>/dev/null && unzip -o "${ARCHIVE_NAME}.zip"; then
+            mv easytier-core* "$ARCH_DIR/" 2>/dev/null || true
+            echo "Extracted to $ARCH_DIR/"
+          else
+            echo "Warning: Failed to download $ARCHIVE_NAME"
+          fi
         done
         
         # Also download easytier-web if available
@@ -87,9 +95,10 @@ jobs:
         for arch in "${WEB_ARCHIVES[@]}"; do
           URL="https://github.com/EasyTier/EasyTier/releases/download/$LATEST_RELEASE/${arch}.zip"
           echo "Downloading $arch..."
-          curl -L -o "${arch}.zip" "$URL" 2>/dev/null && unzip -o "${arch}.zip" || true
-          mkdir -p "easytier-web"
-          mv easytier-web* "easytier-web/" 2>/dev/null || true
+          if curl -L -o "${arch}.zip" "$URL" 2>/dev/null && unzip -o "${arch}.zip"; then
+            mkdir -p "easytier-web"
+            mv easytier-web* "easytier-web/" 2>/dev/null || true
+          fi
         done
         
         ls -la
