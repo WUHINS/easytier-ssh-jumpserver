@@ -20,7 +20,15 @@ RUN ARTIFACT_ARCH=""; \
         echo "Unsupported architecture: $TARGETPLATFORM"; \
         exit 1; \
     fi; \
-    cp /tmp/artifacts/easytier-linux-${ARTIFACT_ARCH}/* /tmp/output;
+    echo "Copying files from /tmp/artifacts/$ARTIFACT_ARCH/"; \
+    ls -la /tmp/artifacts/ || echo "artifacts dir not found"; \
+    if [ -d "/tmp/artifacts/$ARTIFACT_ARCH" ]; then \
+        cp /tmp/artifacts/${ARTIFACT_ARCH}/* /tmp/output/; \
+    else \
+        echo "Directory /tmp/artifacts/${ARTIFACT_ARCH} not found!"; \
+        ls -la /tmp/artifacts/; \
+        exit 1; \
+    fi
 
 FROM base
 
