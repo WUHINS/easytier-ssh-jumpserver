@@ -50,6 +50,11 @@ jobs:
     - name: Download EasyTier binaries
       run: |
         mkdir -p build
+        
+        # 复制 Dockerfile 和 scripts 到 build 目录
+        cp Dockerfile build/
+        cp -r scripts/ build/scripts/
+        
         cd build
         
         # Get latest release from EasyTier
