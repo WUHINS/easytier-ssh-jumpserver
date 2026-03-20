@@ -49,6 +49,9 @@ jobs:
 
     - name: Download EasyTier binaries
       run: |
+        set -e
+        
+        # 创建 build 目录
         mkdir -p build
         
         # 复制 Dockerfile 和 scripts 到 build 目录
@@ -57,66 +60,82 @@ jobs:
         
         cd build
         
-        # Get latest release from EasyTier
-        LATEST_RELEASE=$(curl -s https://api.github.com/repos/EasyTier/EasyTier/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-        echo "Downloading EasyTier $LATEST_RELEASE"
+        # 获取最新版本号
+        LATEST_RELEASE=$(curl -s https://api.github.com/repos/EasyTier/EasyTier/releases/latest | grep '"tag_name":' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+        echo "=== Downloading EasyTier $LATEST_RELEASE ==="
         
-        # Download and extract all architectures
-        # Create directories matching TARGETPLATFORM format
-        # File format: easytier-linux-${ARCH}-${VERSION}.zip, extracts to 'easytier'
-        ARCHIVE_MAP=(
-          "x86_64:easytier-linux-x86_64"
-          "aarch64:easytier-linux-aarch64"
-          "armv7hf:easytier-linux-armv7hf"
-          "armhf:easytier-linux-armhf"
-          "riscv64:easytier-linux-riscv64"
+        # 定义架构映射
+        declare -A ARCH_MAP=(
+          ["x86_64"]="easytier-linux-x86_64"
+          ["aarch64"]="easytier-linux-aarch64"
+          ["armv7hf"]="easytier-linux-armv7hf"
+          ["armhf"]="easytier-linux-armhf"
+          ["riscv64"]="easytier-linux-riscv64"
         )
         
-        for mapping in "${ARCHIVE_MAP[@]}"; do
-          ARCH_DIR="${mapping%%:*}"
-          ARCHIVE_BASE="${mapping##*:}"
+        # 下载并解压每个架构
+        for ARCH_DIR in "${!ARCH_MAP[@]}"; do
+          ARCHIVE_BASE="${ARCH_MAP[$ARCH_DIR]}"
           ARCHIVE_NAME="${ARCHIVE_BASE}-${LATEST_RELEASE}"
           URL="https://github.com/EasyTier/EasyTier/releases/download/$LATEST_RELEASE/${ARCHIVE_NAME}.zip"
-          echo "Downloading $ARCHIVE_NAME..."
           
-          # Create temp dir for extraction
-          TEMP_DIR="temp_${ARCH_DIR}"
-          mkdir -p "$TEMP_DIR"
+          echo ""
+          echo "=== Processing $ARCH_DIR ==="
+          echo "Archive: $ARCHIVE_NAME"
+          
+          # 创建临时目录
+          TEMP_DIR=$(mktemp -d)
           cd "$TEMP_DIR"
           
-          if curl -L -o "${ARCHIVE_NAME}.zip" "$URL" 2>/dev/null && unzip -o "${ARCHIVE_NAME}.zip"; then
-            # List extracted contents for debugging
-            echo "Extracted contents:"
-            ls -laR . | head -20
-            
-            # Find the easytier binary (may be in subdirectory)
-            EASYTIER_BIN=$(find . -name "easytier" -type f 2>/dev/null | head -n1)
-            if [ -n "$EASYTIER_BIN" ]; then
-              cd ..
-              mkdir -p "$ARCH_DIR"
-              cp "$TEMP_DIR/$EASYTIER_BIN" "$ARCH_DIR/easytier"
-              chmod +x "$ARCH_DIR/easytier"
-              echo "✓ Extracted $ARCH_DIR/easytier"
-            else
-              cd ..
-              echo "✗ Warning: easytier binary not found in $ARCHIVE_NAME"
-              echo "Contents of $TEMP_DIR:"
-              ls -la "$TEMP_DIR" || true
-            fi
-            rm -rf "$TEMP_DIR"
-          else
+          # 下载并解压
+          echo "Downloading..."
+          if ! curl -fsSL -o "${ARCHIVE_NAME}.zip" "$URL"; then
+            echo "❌ Failed to download"
             cd ..
-            echo "✗ Warning: Failed to download $ARCHIVE_NAME"
+            rm -rf "$TEMP_DIR"
+            continue
           fi
+          
+          echo "Extracting..."
+          unzip -q "${ARCHIVE_NAME}.zip"
+          
+          # 显示解压内容
+          echo "Extracted files:"
+          find . -type f | head -10
+          
+          # 查找 easytier 二进制文件
+          EASYTIER_BIN=$(find . -name "easytier" -type f | head -n1)
+          
+          if [ -n "$EASYTIER_BIN" ]; then
+            echo "Found: $EASYTIER_BIN"
+            cd ..
+            mkdir -p "$ARCH_DIR"
+            cp "$TEMP_DIR/$EASYTIER_BIN" "$ARCH_DIR/easytier"
+            chmod +x "$ARCH_DIR/easytier"
+            echo "✅ Success: $ARCH_DIR/easytier"
+            ls -la "$ARCH_DIR/"
+          else
+            echo "❌ easytier binary not found!"
+            echo "Contents of temp dir:"
+            ls -laR
+            cd ..
+          fi
+          
+          rm -rf "$TEMP_DIR"
         done
         
+        # 显示最终目录结构
         echo ""
-        echo "=== Build directory structure ==="
+        echo "=== Final Build Directory Structure ==="
         ls -la
         for dir in x86_64 aarch64 armv7hf armhf riscv64; do
           if [ -d "$dir" ]; then
+            echo ""
             echo "--- $dir ---"
             ls -la "$dir"
+            file "$dir/easytier" 2>/dev/null || true
+          else
+            echo "❌ Directory $dir NOT FOUND!"
           fi
         done
 
