@@ -4,7 +4,6 @@
 
 ### Push 到 main 分支
 当你推送代码到 `main` 分支时，会自动构建并推送镜像到：
-- Docker Hub: `wuhins/easytier-ssh-jumpserver:latest`
 - GitHub Container Registry: `ghcr.io/wuhins/easytier-ssh-jumpserver:latest`
 
 ### 创建版本标签
@@ -15,9 +14,9 @@ git push origin v2.5.0
 ```
 
 镜像标签：
-- `wuhins/easytier-ssh-jumpserver:v2.5.0`
-- `wuhins/easytier-ssh-jumpserver:v2`
-- `wuhins/easytier-ssh-jumpserver:v2.5`
+- `ghcr.io/wuhins/easytier-ssh-jumpserver:v2.5.0`
+- `ghcr.io/wuhins/easytier-ssh-jumpserver:v2`
+- `ghcr.io/wuhins/easytier-ssh-jumpserver:v2.5`
 
 ## 手动触发（Workflow Dispatch）
 
@@ -61,36 +60,16 @@ curl -L \
 
 ## 配置 Secrets
 
-在 GitHub 仓库中配置以下 Secrets：
+**好消息**: 不需要额外配置 Secrets！
 
-1. 进入仓库 **Settings** > **Secrets and variables** > **Actions**
-2. 点击 **New repository secret**
-3. 添加以下 secrets：
+GitHub Container Registry (GHCR) 使用自动生成的 `GITHUB_TOKEN` 进行认证，无需手动配置 Docker Hub 凭证。
 
-### Docker Hub
-```
-Name: DOCKERHUB_USERNAME
-Value: your-dockerhub-username
-
-Name: DOCKERHUB_TOKEN
-Value: your-dockerhub-access-token
-```
-
-获取 Docker Hub Token：
-1. 登录 Docker Hub: https://hub.docker.com
-2. 进入 **Account Settings** > **Security**
-3. 点击 **New Access Token**
-4. 输入描述，选择读写权限
-5. 复制生成的 token
-
-### GitHub Container Registry
-GHCR 使用 `GITHUB_TOKEN` 自动认证，无需额外配置。
+工作流会自动使用 `${{ secrets.GITHUB_TOKEN }}` 登录 GHCR。
 
 ## 工作流输出
 
 工作流运行成功后，你会收到：
 - ✅ 构建成功的通知
-- 📦 Docker Hub 镜像：https://hub.docker.com/r/wuhins/easytier-ssh-jumpserver
 - 📦 GHCR 镜像：https://github.com/WUHINS/easytier-ssh-jumpserver/pkgs/container/easytier-ssh-jumpserver
 
 ## 查看构建日志
@@ -117,9 +96,9 @@ GHCR 使用 `GITHUB_TOKEN` 自动认证，无需额外配置。
 ### 推送失败
 
 检查项目：
-1. **Docker Hub 凭证**: 确认 username 和 token 正确
-2. **GHCR 权限**: 确认仓库有写入权限
-3. **镜像名称**: 确认镜像名称格式正确
+1. **GHCR 权限**: 确认仓库有写入权限
+2. **GITHUB_TOKEN**: 确认自动生成的 token 有效
+3. **镜像名称**: 确认镜像名称格式为 `ghcr.io/wuhins/easytier-ssh-jumpserver`
 
 ### 手动触发不显示
 
