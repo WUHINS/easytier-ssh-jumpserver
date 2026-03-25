@@ -39,9 +39,11 @@ WORKDIR /app
 # 安装 easytier-core
 COPY --from=builder --chmod=755 /tmp/output/* /usr/local/bin
 
-# 复制脚本
+# 复制脚本并转换为 Unix 换行符
 COPY scripts/ /usr/local/bin/
-RUN chmod +x /usr/local/bin/*.sh
+RUN chmod +x /usr/local/bin/*.sh && \
+    # 转换所有脚本为 Unix 换行符 (CRLF -> LF)
+    for f in /usr/local/bin/*.sh; do sed -i 's/\r$//' "$f"; done
 
 # 创建受限的 jumpshell
 RUN cp /usr/local/bin/jumpshell.sh /jumpshell && \
