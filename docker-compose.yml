@@ -50,8 +50,8 @@ services:
       - /dev/net/tun:/dev/net/tun
     
     volumes:
-      # SSH 密钥配置
-      - ./ssh_keys:/root/.ssh:rw
+      # SSH 密钥配置（默认用户 'ssh' 的密钥目录）
+      - ./ssh_keys:/home/ssh/.ssh:rw
       # 持久化 EasyTier 配置（可选）
       - ./easytier_config:/root/.easytier:rw
       # 持久化日志（可选）

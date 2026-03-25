@@ -37,14 +37,20 @@ mkdir -p ssh_keys
 cp ~/.ssh/id_ed25519.pub ssh_keys/authorized_keys
 chmod 600 ssh_keys/authorized_keys
 
-# 编辑 docker-compose.yml 配置环境变量
-
-# 启动容器
+# 启动容器（默认启用受限模式，用户名为 'ssh'）
 docker compose up -d
 
 # 查看日志
 docker compose logs -f
+
+# 使用受限用户连接
+ssh ssh@<virtual-ip>
 ```
+
+**说明**：
+- 默认启用受限模式，用户只能执行 SSH 命令
+- 默认用户名为 `ssh`
+- 推荐使用 SSH 密钥认证
 
 ### 3. 使用 Docker 运行
 
@@ -226,14 +232,14 @@ chmod 600 ssh_keys/authorized_keys
 
 ```yaml
 volumes:
-  - ./ssh_keys:/root/.ssh:rw
+  - ./ssh_keys:/home/ssh/.ssh:rw  # 挂载到 ssh 用户家目录
 ```
 
 ### 步骤 4：不设置密码（可选）
 
 ```yaml
 environment:
-  - SSH_USER=root
+  # 默认用户就是 'ssh'，无需设置
   # 不设置 SSH_PASSWORD，只使用密钥认证
 ```
 
