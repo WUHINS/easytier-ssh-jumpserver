@@ -142,8 +142,8 @@ start_sshd
 
 echo ""
 echo "=== EasyTier SSH Jumpserver Ready ==="
-SSH User: $SSH_USER
-SSH Port: $SSH_PORT
+echo "SSH User: $SSH_USER"
+echo "SSH Port: $SSH_PORT"
 if [ -n "$ET_CONFIG_SERVER" ]; then
     echo "Config Server: $ET_CONFIG_SERVER"
     echo "Managed by EasyTier Web Console"
