@@ -47,10 +47,6 @@ RUN chmod +x /usr/local/bin/*.sh
 RUN cp /usr/local/bin/jumpshell.sh /jumpshell && \
     chmod +x /jumpshell
 
-# 创建用户管理脚本
-RUN cp /usr/local/bin/create-jumpuser.sh /usr/local/bin/ && \
-    chmod +x /usr/local/bin/create-jumpuser.sh
-
 # 重命名 easytier 为 easytier-core 以保持一致性
 RUN mv /usr/local/bin/easytier /usr/local/bin/easytier-core
 
