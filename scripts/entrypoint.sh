@@ -93,7 +93,31 @@ start_easytier() {
 # 启动 SSH 服务
 start_sshd() {
     echo "=== Starting SSHD ==="
-    /usr/sbin/sshd -D &
+    # 确保 sshd 目录存在
+    mkdir -p /var/run/sshd
+    
+    # 测试 sshd 配置
+    echo "Testing SSH configuration..."
+    /usr/sbin/sshd -t || echo "SSH configuration test failed"
+    
+    # 启动 sshd
+    echo "Starting sshd daemon..."
+    /usr/sbin/sshd
+    
+    # 检查是否启动成功
+    sleep 1
+    if pgrep -x "sshd" > /dev/null; then
+        echo "✓ SSHD started successfully"
+    else
+        echo "✗ SSHD failed to start, trying again..."
+        /usr/sbin/sshd
+        sleep 1
+        if pgrep -x "sshd" > /dev/null; then
+            echo "✓ SSHD started on second attempt"
+        else
+            echo "✗ SSHD still failed, check logs"
+        fi
+    fi
 }
 
 # 清理函数
