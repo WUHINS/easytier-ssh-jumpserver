@@ -30,7 +30,6 @@ PermitRootLogin yes
 PasswordAuthentication yes
 PubkeyAuthentication yes
 ChallengeResponseAuthentication no
-UsePAM yes
 X11Forwarding no
 PrintMotd no
 AcceptEnv LANG LC_*
