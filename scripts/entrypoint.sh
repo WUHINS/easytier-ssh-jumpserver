@@ -52,15 +52,15 @@ init_ssh() {
         
         # 确保 authorized_keys 存在且权限正确
         mkdir -p /home/ssh/.ssh
-        chmod 700 /home/ssh/.ssh
+        chmod 700 /home/ssh/.ssh 2>/dev/null || true
         if [ -f /home/ssh/.ssh/authorized_keys ]; then
-            chmod 600 /home/ssh/.ssh/authorized_keys
-            chown ssh:ssh /home/ssh/.ssh/authorized_keys
-            echo "✓ SSH authorized_keys permissions set"
+            chmod 600 /home/ssh/.ssh/authorized_keys 2>/dev/null || echo "⚠ Cannot modify authorized_keys permissions (read-only mount)"
+            chown ssh:ssh /home/ssh/.ssh/authorized_keys 2>/dev/null || true
+            echo "✓ SSH authorized_keys found"
         else
             echo "⚠ No authorized_keys found, key-based auth will not work"
         fi
-        chown ssh:ssh /home/ssh/.ssh
+        chown ssh:ssh /home/ssh/.ssh 2>/dev/null || true
     fi
 }
 
