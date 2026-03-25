@@ -50,11 +50,17 @@ init_ssh() {
             /usr/local/bin/create-jumpuser.sh ssh || echo "User creation failed, may already exist"
         fi
         
-        # 确保 authorized_keys 权限正确
+        # 确保 authorized_keys 存在且权限正确
+        mkdir -p /home/ssh/.ssh
+        chmod 700 /home/ssh/.ssh
         if [ -f /home/ssh/.ssh/authorized_keys ]; then
             chmod 600 /home/ssh/.ssh/authorized_keys
             chown ssh:ssh /home/ssh/.ssh/authorized_keys
+            echo "✓ SSH authorized_keys permissions set"
+        else
+            echo "⚠ No authorized_keys found, key-based auth will not work"
         fi
+        chown ssh:ssh /home/ssh/.ssh
     fi
 }
 
